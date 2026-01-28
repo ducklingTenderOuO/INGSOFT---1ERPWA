@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Lista de Tareas - PWA para gestionar tus tareas diarias">
+    <meta name="theme-color" content="#6366f1">
+    
+    <title>Mi Lista de Tareas</title>
+    
+    <!-- Link al manifest -->
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- Icons para iOS -->
+    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
+    
+    <!-- Estilos -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📝 Mis Tareas</h1>
+            <p class="subtitle">Organiza tu día de manera simple</p>
+        </header>
+
+        <div class="add-task-container">
+            <input 
+                type="text" 
+                id="taskInput" 
+                placeholder="Escribe una nueva tarea..."
+                autocomplete="off"
+            >
+            <button id="addTaskBtn" class="btn-add">
+                <span>+</span> Agregar
+            </button>
+        </div>
+
+        <div class="filter-container">
+            <button class="filter-btn active" data-filter="all">Todas</button>
+            <button class="filter-btn" data-filter="pending">Pendientes</button>
+            <button class="filter-btn" data-filter="completed">Completadas</button>
+        </div>
+
+        <div class="stats">
+            <span id="taskCount">0 tareas</span>
+            <span id="completedCount">0 completadas</span>
+        </div>
+
+        <ul id="taskList" class="task-list"></ul>
+
+        <div class="empty-state" id="emptyState">
+            <p>🎉 No hay tareas pendientes</p>
+            <p class="empty-subtitle">¡Agrega tu primera tarea arriba!</p>
+        </div>
+
+        <footer>
+            <button id="installBtn" class="install-btn" style="display: none;">
+                📲 Instalar App
+            </button>
+            <p class="footer-text">PWA - Funciona sin conexión</p>
+        </footer>
+    </div>
+
+    <!-- Scripts -->
+    <script src="app.js"></script>
+    <script>
+        // Registrar Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('service-worker.js')
+                    .then(registration => {
+                        console.log('Service Worker registrado:', registration);
+                    })
+                    .catch(error => {
+                        console.log('Error al registrar Service Worker:', error);
+                    });
+            });
+        }
+
+        // Funcionalidad de instalación
+        let deferredPrompt;
+        const installBtn = document.getElementById('installBtn');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            installBtn.style.display = 'block';
+        });
+
+        installBtn.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                console.log(`User response: ${outcome}`);
+                deferredPrompt = null;
+                installBtn.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
